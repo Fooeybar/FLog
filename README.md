@@ -3,7 +3,7 @@ Logging Object for Socket.io // Console.log and Parent-Child Logging over Socket
 
 FLog is designed for print logging,
 
-FLog can be enabled to attach to a socket, read the console.log, or utilize a parent-child structure with other FLogs.
+FLog can be enabled to attach to a socket, read the console.log, and utilize a parent-child structure with other FLogs.
 
 Create a new FLog by:<br/>
       const FLog=require('./FLog');<br/>
