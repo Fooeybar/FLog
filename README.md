@@ -1,4 +1,4 @@
-# FLog.io
+# FLog
 Logging Object for Socket.io // Console.log and Parent-Child Logging over Socket.io
 
 FLog is designed for print logging,
