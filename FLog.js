@@ -1,89 +1,81 @@
-function FLog(_name='nameless :(',_socketable=false,_consol=false,_parent=false){
+function FLog(_name='nameless :(',_writeconsole=false,_readconsole=false){
     let name=_name+' FLog';
     this.GetName=()=>{let temp=name;return temp;}
-    let socketable=_socketable;
     let socket;
-    let autosave=socketable;
-    let consol=_consol;
+    let autosave=true;
+    let readconsole=!!_readconsole;
     let fromconsole=false;
-    let parent=_parent;
-    let lines=['       **********//////////// Begin '+name+' Socket-Init Package \\\\\\\\\\\\\\\\\\\\\\\\**********'];
+    let writeconsole=!!_writeconsole;
+    let lock=false;
+    let lines=['**********//////////// Begin '+name+' Socket-Init Package \\\\\\\\\\\\\\\\\\\\\\\\**********'];
 
-    if(_parent){
-        this.BindChild=(_childlog)=>{
-            if(_childlog!==undefined){
-                _childlog.print=this.print.bind(_childlog.print);
+    let Print=(_msg='---?? print test ??---')=>{
+            if(autosave){
+                if(readconsole)if(fromconsole)for(let i in _msg)lines.push(_msg[i]);
+                else if(!readconsole)lines.push(_msg);
             }
-        };
-    }
-
-    let Print=function(_msg='',_lines=undefined){
-        if(_lines===undefined)_lines=lines;
-        if(_msg===''){_msg='---?? print test ??---';fromconsole=false;}
-        if(autosave){
-            if(consol)if(fromconsole)for(let i in _msg)_lines.push(_msg[i]);
-            else if(!consol)_lines.push(_msg);
-        }
-        if(socketable&&socket!==undefined){
-            if(!fromconsole)socket.emit(name,[_msg]);
-        }
-        if(!fromconsole){
-            if(parent)console.log(_msg);
-        }
-        fromconsole=false;
-    };
-    
-    if(socketable){
-        this.SetSocket=(_socket)=>{
-            if(socket===undefined){
-                socket=_socket;
-                let testmsg=['?? socket test message ??'];
-                socket.emit(name,testmsg);
-                Print();
-                lines.push('       **********//////////// End '+name+' Socket-Init Package \\\\\\\\\\\\\\\\\\\\\\\\**********');
-                socket.emit(name,lines);
-                autosave=false;
+            if(!fromconsole){
+                if(socket!==undefined)socket.emit(name,[_msg]);
+                if(writeconsole)console.log(_msg);
             }
-            else Print('       ~~~|| '+name+': socket previously set ||~~~');
-        };
-    }
-
-    this.print=(_msg='---?? Log.print test ??---')=>{
             fromconsole=false;
-            Print(_msg);
         };
-    if(consol){
-        console.everything=[];
+
+    if(readconsole){
+        console.flog=[];
         let printconsole=()=>{
             fromconsole=true;
-            Print(console.everything);
-            console.everything.length=0;
+            Print(console.flog);
+            console.flog.length=0;
         };
         console.defaultLog=console.log.bind(console);
         console.log=function(){
-            console.everything.push(Array.from(arguments));
-            console.defaultLog.apply(console, arguments);
+            console.flog.push(Array.from(arguments));
+            console.defaultLog.apply(console,arguments);
             printconsole();
         }
         console.defaultError=console.error.bind(console);
         console.error=function(){
-            console.everything.push(Array.from(arguments));
-            console.defaultError.apply(console, arguments);
+            console.flog.push(Array.from(arguments));
+            console.defaultError.apply(console,arguments);
             printconsole();
         }
         console.defaultWarn=console.warn.bind(console);
         console.warn=function(){
-            console.everything.push(Array.from(arguments));
-            console.defaultWarn.apply(console, arguments);
+            console.flog.push(Array.from(arguments));
+            console.defaultWarn.apply(console,arguments);
             printconsole();
         }
         console.defaultDebug=console.debug.bind(console);
         console.debug=function(){
-            console.everything.push(Array.from(arguments));
-            console.defaultDebug.apply(console, arguments);
+            console.flog.push(Array.from(arguments));
+            console.defaultDebug.apply(console,arguments);
             printconsole();
         }
     }
+
+    this.SetSocket=(_socket,_lock=false)=>{
+        lock=!!_lock;
+        if(socket===undefined||(_socket!==undefined&&!lock)){
+            socket=_socket;
+            let testmsg=['?? socket test message ??'];
+            socket.emit(name,testmsg);
+            Print();
+            lines.push('       **********//////////// End '+name+' Socket-Init Package \\\\\\\\\\\\\\\\\\\\\\\\**********');
+            socket.emit(name,lines);
+            autosave=false;
+        }
+        else Print('       ~~~|| '+name+': socket locked ||~~~');
+    };
+
+    this.AddChild=(_child)=>{
+        if(_child instanceof FLog)_child.print=this.Print.bind(_child.print);
+    };
+    
+    this.Print=(_msg='---?? Log.print test ??---')=>{
+        fromconsole=false;
+        Print(_msg);
+    };
 
 };
 module.exports=FLog;

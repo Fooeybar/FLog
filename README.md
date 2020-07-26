@@ -1,36 +1,33 @@
-# FLog
-Logging Object for sockets // Console.log and Parent-Child Logging over sockets
-
-FLog is designed for print logging,
-
-FLog can be enabled to attach to a socket, read the console.log, and utilize a parent-child structure with other FLogs.
-
+# FLog.io
+Logging Object for Socket.io // Console.log and Parent-Child Logging over Socket.io<br/>
+<br/>
+FLog is designed for print logging; helpful in areas such as admin of multiple chat rooms or game servers<br/>
+The nested structure allows for the parent to log the output of its children over sockets.<br/>
+<br/>
+FLog can be enabled to attach to a socket, read the console.log, or utilize a parent-child structure with other FLogs<br/>
+<br/>
 Create a new FLog by:<br/>
       const FLog=require('./FLog');<br/>
-      let flog=new FLog('log1');<br/>
+      let flog=new FLog('name');<br/>
 <br/>
-To use the socket function, set '\_socketable=true' when using new:<br/>
-      let flog=new FLog('name',true);<br/>
-  Then when you have a connected socket:<br/>
+To use the socket function:<br/>
       flog.SetSocket(\_socket);<br/>
   Once connected, the FLog will send a test message over the socket, will attempt a Print call, and then AutoSave will send<br/>
   all log.print calls since instantiation.<br/>
   The FLog will continue to emit all log.print messages through the socket.<br/>
   The receiving message event is the log name. Use log.GetName() to get the log name.<br/>
+  A lock parameter is false by default. If set to 'true' the socket cannot be set again.<br/>
 <br/>
 To enable logging of console.log:<br/>
-      set '\_consol=true' when using new<br/>
-      let flog=new FLog('name',true,true);<br/>
+      set '\_readconsole=true' when using new<br/>
+      let flog=new FLog('name',false,true);<br/>
   The FLog will bind to the console.log function and log both the console output and log.print calls.<br/>
   <br/>
 To enable parent-child structure logging of multiple FLogs:<br/>
-  FLog is by default an orphan child log.<br/>
-      set '\_parent=true' for FLog to be the parent log<br/>
-  A parent FLog will FLog.print only to itself, its socket, and the console.<br/>
-  <br/>
   Bind a child FLog to a parent by:<br/>
-      let flog2=new FLog('log2');<br/>
-      flog.BindChild(flog2);<br/>
-  A bound child FLog will Flog.print only to itself, its socket, and it's parent, the parent will print to the console.log for the child.<br/>
+      flog.BindChild(childlog);<br/>
+  A bound child FLog will log.print only to itself, its socket, and it's parent; the parent will print to the console.log for the child,<br/>
+  if the parent has '\_writeconsole' set to true.<br/>
+<br/>
 
   
