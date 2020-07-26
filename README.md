@@ -25,7 +25,7 @@ To enable logging of console.log:<br/>
   <br/>
 To enable parent-child structure logging of multiple FLogs:<br/>
   Bind a child FLog to a parent by:<br/>
-      flog.BindChild(childlog);<br/>
+      flog.AddChild(childlog);<br/>
   A bound child FLog will log.print only to itself, its socket, and it's parent; the parent will print to the console.log for the child,<br/>
   if the parent has '\_writeconsole' set to true.<br/>
 <br/>
