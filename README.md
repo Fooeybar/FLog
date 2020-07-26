@@ -1,5 +1,5 @@
 # FLog.io
-Logging Object for Socket.io // Console.log and Parent-Child Logging over Socket.io<br/>
+Logging Object for sockets // Console.log and Nested Logging over sockets<br/>
 <br/>
 FLog is designed for print logging; helpful in areas such as admin of multiple chat rooms or game servers<br/>
 The nested structure allows for the parent to log the output of its children over sockets.<br/>
