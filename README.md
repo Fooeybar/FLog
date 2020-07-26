@@ -26,11 +26,11 @@ To enable logging of console.log:<br/>
 To enable parent-child structure logging of multiple FLogs:<br/>
   FLog is by default an orphan child log.<br/>
       set '\_parent=true' for FLog to be the parent log<br/>
-  A parent FLog will FLog.print only to itself and the console.<br/>
+  A parent FLog will FLog.print only to itself, its socket, and the console.<br/>
   <br/>
   Bind a child FLog to a parent by:<br/>
       let flog2=new FLog('log2');<br/>
       flog.BindChild(flog2);<br/>
-  A bound child FLog will Flog.print only to itself and it's parent, the parent will print to the console.log for the child.<br/>
-  If the parent is socket enabled the parent will also emit through the socket for the child.<br/>
+  A bound child FLog will Flog.print only to itself, its socket, and it's parent, the parent will print to the console.log for the child.<br/>
+
   
