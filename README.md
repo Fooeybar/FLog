@@ -1,13 +1,13 @@
 # FLog.io
-Logging Object for sockets // Console.log and Nested Logging over sockets<br/>
+Logging Object for Socket.io // Console.log and Parent-Child Logging over Socket.io<br/>
 <br/>
 FLog is designed for print logging; helpful in areas such as admin of multiple chat rooms or game servers<br/>
 The nested structure allows for the parent to log the output of its children over sockets.<br/>
 <br/>
-FLog can be enabled to attach to a socket, read the console.log, or utilize a parent-child structure with other FLogs<br/>
+FLog can be enabled to attach to a socket, read the console.log, and utilize a parent-child structure with other FLogs<br/>
 <br/>
 Create a new FLog by:<br/>
-      const FLog=require('./FLog');<br/>
+      const FLog=require('./FLog.io');<br/>
       let flog=new FLog('name');<br/>
 <br/>
 To use the socket function:<br/>
@@ -25,9 +25,7 @@ To enable logging of console.log:<br/>
   <br/>
 To enable parent-child structure logging of multiple FLogs:<br/>
   Bind a child FLog to a parent by:<br/>
-      flog.AddChild(childlog);<br/>
-  A bound child FLog will log.print only to itself, its socket, and it's parent; the parent will print to the console.log for the child,<br/>
-  if the parent has '\_writeconsole' set to true.<br/>
-<br/>
+      flog.BindChild(childlog);<br/>
+
 
   

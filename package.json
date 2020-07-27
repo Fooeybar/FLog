@@ -1,0 +1,38 @@
+{
+  "name": "flog.io",
+  "version": "1.0.1",
+  "description": "Nest-able Logging Object For Sockets",
+  "main": "FLog.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fooeybar/FLog.io.git"
+  },
+  "keywords": [
+    "Socket.io",
+    "socket.io",
+    "sockets",
+    "socket",
+    "Log",
+    "log",
+    "FLog",
+    "flog",
+    "FLog.io",
+    "flog.io",
+    "Log.io",
+    "log.io",
+    "Logging",
+    "logging",
+    "Websockets",
+    "websockets",
+    "ws"
+  ],
+  "author": "Fooeybar",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Fooeybar/FLog.io/issues"
+  },
+  "homepage": "https://github.com/Fooeybar/FLog.io#readme"
+}
