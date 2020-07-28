@@ -2,7 +2,7 @@
   "name": "flog.io",
   "version": "2.0.0",
   "description": "Nest-able Logging Object For Sockets",
-  "main": "FLog.io.js",
+  "main": "flog.io.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
