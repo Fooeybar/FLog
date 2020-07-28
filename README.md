@@ -4,6 +4,8 @@ Logging Object For Sockets // Console And Nested Logging<br/>
 flog.io is designed for nested print logging; helpful in areas such as admin of multiple chat rooms or game servers.<br/>
 The nested structure allows for the parent to log the output of its children over sockets.<br/>
 
+npm install flog.io<br/>
+
 Create a new log by:<br/>
 ---const flog=require('flog.io');<br/>
 ---let log=new flog.io(parameters);<br/>
