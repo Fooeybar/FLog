@@ -9,7 +9,7 @@ npm install flog.io<br/>
 
 Create a new log by:<br/>
 ---const flog=require('flog.io');<br/>
----let log=new flog.io(parameters);<br/>
+---let yourvariable=new flog.io(parameters);<br/>
 
 Default Parameter Object:<br/>
 {<br/>
@@ -31,21 +31,23 @@ name:'flog.io'<br/>
 }<br/>
 
 To enable parent-child structure logging of multiple logs, add a child log to a parent by:<br/>
----flog.AddChild(child);<br/>
+---yourvariable.AddChild(child);<br/>
 
-log.SetSocket(\_socket);<br/>
+yourvariable.SetSocket(\_socket);<br/>
 ---Once connected, the log will send a test message over the socket, will attempt a Print call, and then Save will send<br/>
----all log.Print calls since instantiation.<br/>
----The log will continue to emit all log.Print messages through the socket.<br/>
+---all yourvariable.Print calls since instantiation.<br/>
+---The log will continue to emit all yourvariable.Print messages through the socket.<br/>
 ---The receiving message event by default is 'flog.io'<br/>
 ---A lock parameter is true by default and when locked cannot be re-assigned<br/>
----To disconnect the socket, if lock is disabled, call log.SetSocket(undefined)<br/>
+---To disconnect the socket, if lock is disabled, call yourvariable.SetSocket(undefined)<br/>
 
 To enable logging of console.log:<br/>
 ---set '\_readconsole=true'<br/>
----The log will bind to the console.log functions and print both the console output and log.Print calls.<br/>
+---The log will bind to the console.log functions and print both the console output and yourvariable.Print calls.<br/>
 <br/>
 
+Future edits will include:<br/>
+---asynchronous functions<br/>
 
 
 
