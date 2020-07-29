@@ -16,24 +16,25 @@ Default Parameter Object:<br/>
 name:'flog.io'<br/>
 ,readconsole:false<br/>
 ,writeconsole:true<br/>
-,formatting:true<br/>
-,prefix:'\> '<br/>
-,nametag:''<br/>
-,suffix:' \> '<br/>
-,logtag:'\-\-'<br/>
-,errtag:'\!\!'<br/>
-,warntag:'\~\~'<br/>
-,testtag:'\?\?'<br/>
-,emitname:'flog.io'<br/>
 ,save:100<br/>
 ,socket:undefined<br/>
 ,lock:true<br/>
+,emitname:'flog.io'<br/>
+,formatting:true<br/>
+---,prefix:'\> '<br/>
+---,nametag:''<br/>
+---,suffix:' \> '<br/>
+---,logtag:'\-\-'<br/>
+---,errtag:'\!\!'<br/>
+---,warntag:'\~\~'<br/>
+---,testtag:'\?\?'<br/>
 }<br/>
 
 To enable parent-child structure logging of multiple logs, add a child log to a parent by:<br/>
 ---yourvariable.AddChild(child);<br/>
 
-yourvariable.SetSocket(\_socket);<br/>
+To enable the socket logging:<br/>
+---yourvariable.SetSocket(\_socket);<br/>
 ---Once connected, the log will send a test message over the socket, will attempt a Print call, and then Save will send<br/>
 ---all yourvariable.Print calls since instantiation.<br/>
 ---The log will continue to emit all yourvariable.Print messages through the socket.<br/>
@@ -48,6 +49,7 @@ To enable logging of console.log:<br/>
 
 Future edits will include:<br/>
 ---asynchronous functions<br/>
+---file logging<br/>
 
 
 

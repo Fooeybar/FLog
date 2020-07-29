@@ -1,9 +1,13 @@
 const flog=(()=>{
     const flogname='flog.io';
     const io=function(_params={
-        name:''
+        name:flogname
         ,readconsole:false
         ,writeconsole:true
+        ,save:100
+        ,socket:undefined
+        ,lock:true
+        ,emitname:flogname
         ,formatting:true
         ,prefix:'\> '
         ,nametag:''
@@ -12,10 +16,6 @@ const flog=(()=>{
         ,errtag:'\!\!'
         ,warntag:'\~\~'
         ,testtag:'\?\?'
-        ,emitname:flogname
-        ,save:100
-        ,socket:undefined
-        ,lock:true
     }){
         if(_params.name===undefined||_params.name==='')_params.name=flogname;
         if(_params.readconsole===undefined)_params.readconsole=false;
@@ -47,7 +47,7 @@ const flog=(()=>{
             let Events=require('events');
             let emitter=new Events.EventEmitter();
             var fromconsole=false;
-            console.flog={};//its all for the flog.io name
+            console.flog={};//extra
             if(console.flog.io===undefined){
                 console.flog.io=[];
                 console.defaultLog=console.log.bind(console);
@@ -108,20 +108,7 @@ const flog=(()=>{
         }
         let _Print=(_msg,_tag,_config)=>{
             let _config_={};
-            if(_config===undefined)_config_={
-                readconsole:!!_config.readconsole
-                ,writeconsole:!!_config.writeconsole
-                ,formatting:!!_config.formatting
-                ,prefix:''+_config.prefix
-                ,nametag:''+_config.nametag
-                ,suffix:''+_config.suffix
-                ,logtag:''+_config.logtag
-                ,errtag:''+_config.errtag
-                ,warntag:''+_config.warntag
-                ,testtag:''+_config.testtag
-                ,emitname:''+_config.emitname
-                ,save:(_config.save instanceof Number)?_config.save:100
-            }
+            if(_config===undefined)_config_=params;
             else{
                 _config_.readconsole=!!_config.readconsole;
                 _config_.writeconsole=!!_config.writeconsole;
