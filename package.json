@@ -1,6 +1,6 @@
 {
   "name": "flog.io",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Nest-able Logging Object For Sockets",
   "main": "flog.io.js",
   "scripts": {
@@ -32,7 +32,7 @@
   "author": "Fooeybar",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Fooeybar/FLog.io/issues"
+    "url": "https://github.com/Fooeybar/flog.io/issues"
   },
-  "homepage": "https://github.com/Fooeybar/FLog.io#readme"
+  "homepage": "https://github.com/Fooeybar/flog.io#readme"
 }
