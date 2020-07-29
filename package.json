@@ -1,6 +1,6 @@
 {
   "name": "flog.io",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "Nest-able Logging Object For Sockets",
   "main": "flog.io.js",
   "scripts": {

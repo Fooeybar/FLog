@@ -13,7 +13,7 @@ Create a new log by:<br/>
 
 Default Parameter Object:<br/>
 {<br/>
-name:''<br/>
+name:'flog.io'<br/>
 ,readconsole:false<br/>
 ,writeconsole:true<br/>
 ,formatting:true<br/>
@@ -27,7 +27,7 @@ name:''<br/>
 ,emitname:'flog.io'<br/>
 ,save:100<br/>
 ,socket:undefined<br/>
-,lock:false<br/>
+,lock:true<br/>
 }<br/>
 
 To enable parent-child structure logging of multiple logs, add a child log to a parent by:<br/>
@@ -38,7 +38,7 @@ log.SetSocket(\_socket);<br/>
 ---all log.Print calls since instantiation.<br/>
 ---The log will continue to emit all log.Print messages through the socket.<br/>
 ---The receiving message event by default is 'flog.io'<br/>
----A lock parameter is false by default. If lock is set to 'true' the socket cannot be set again.<br/>
+---A lock parameter is true by default and when locked cannot be re-assigned<br/>
 ---To disconnect the socket, if lock is disabled, call log.SetSocket(undefined)<br/>
 
 To enable logging of console.log:<br/>

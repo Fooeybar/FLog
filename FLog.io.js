@@ -47,41 +47,42 @@ const flog=(()=>{
             let Events=require('events');
             let emitter=new Events.EventEmitter();
             var fromconsole=false;
-            if(console.flog===undefined){
-                console.flog=[];
+            console.flog={};//its all for the flog.io name
+            if(console.flog.io===undefined){
+                console.flog.io=[];
                 console.defaultLog=console.log.bind(console);
                 console.log=function(){
-                    console.flog.length=0;
-                    console.flog.push(Array.from(arguments));
+                    console.flog.io.length=0;
+                    console.flog.io.push(Array.from(arguments));
                     console.defaultLog.apply(console,arguments);
                     emitter.emit(conlog,params.logtag);
                 }
                 console.defaultError=console.error.bind(console);
                 console.error=function(){
-                    console.flog.length=0;
-                    console.flog.push(Array.from(arguments));
+                    console.flog.io.length=0;
+                    console.flog.io.push(Array.from(arguments));
                     console.defaultError.apply(console,arguments);
                     emitter.emit(conlog,params.errtag);
                 }
                 console.defaultWarn=console.warn.bind(console);
                 console.warn=function(){
-                    console.flog.length=0;
-                    console.flog.push(Array.from(arguments));
+                    console.flog.io.length=0;
+                    console.flog.io.push(Array.from(arguments));
                     console.defaultWarn.apply(console,arguments);
                     emitter.emit(conlog,params.warntag);
                 }
                 console.defaultDebug=console.debug.bind(console);
                 console.debug=function(){
-                    console.flog.length=0;
-                    console.flog.push(Array.from(arguments));
+                    console.flog.io.length=0;
+                    console.flog.io.push(Array.from(arguments));
                     console.defaultDebug.apply(console,arguments);
                     emitter.emit(conlog,params.testtag);
                 }
             }
             emitter.on(conlog,(_tag)=>{
-                for(let i in console.flog){
+                for(let i in console.flog.io){
                     fromconsole=true;
-                    this.Print(console.flog[i],_tag,params);
+                    this.Print(console.flog.io[i],_tag,params);
                 }
             });
         }
@@ -120,19 +121,21 @@ const flog=(()=>{
                 ,testtag:''+_config.testtag
                 ,emitname:''+_config.emitname
                 ,save:(_config.save instanceof Number)?_config.save:100
-            };
-            _config_.readconsole=!!_config.readconsole;
-            _config_.writeconsole=!!_config.writeconsole;
-            _config_.formatting=!!_config.formatting;
-            _config_.prefix=''+_config.prefix;
-            _config_.nametag=''+_config.nametag;
-            _config_.suffix=''+_config.suffix;
-            _config_.logtag=''+_config.logtag;
-            _config_.errtag=''+_config.errtag;
-            _config_.warntag=''+_config.warntag;
-            _config_.testtag=''+_config.testtag;
-            _config_.emitname=''+_config.emitname;
-            _config_.save=(_config.save instanceof Number)?_config.save:100;
+            }
+            else{
+                _config_.readconsole=!!_config.readconsole;
+                _config_.writeconsole=!!_config.writeconsole;
+                _config_.formatting=!!_config.formatting;
+                _config_.prefix=''+_config.prefix;
+                _config_.nametag=''+_config.nametag;
+                _config_.suffix=''+_config.suffix;
+                _config_.logtag=''+_config.logtag;
+                _config_.errtag=''+_config.errtag;
+                _config_.warntag=''+_config.warntag;
+                _config_.testtag=''+_config.testtag;
+                _config_.emitname=''+_config.emitname;
+                _config_.save=(_config.save instanceof Number)?_config.save:100;
+            }
             if(fromconsole){
                 PushPop(_msg,_config_);
                 if(socket!==undefined)socket.emit(_config_.emitname,[_msg]);
