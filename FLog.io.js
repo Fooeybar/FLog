@@ -1,186 +1,159 @@
 const flog=(()=>{
     const flogname='flog.io';
-    const io=function(_params={
-        name:flogname
-        ,readconsole:false
-        ,writeconsole:true
-        ,save:100
-        ,socket:undefined
-        ,lock:true
-        ,emitname:flogname
-        ,formatting:true
-        ,prefix:'\> '
-        ,nametag:''
-        ,suffix:' \> '
-        ,logtag:'\-\-'
-        ,errtag:'\!\!'
-        ,warntag:'\~\~'
-        ,testtag:'\?\?'
-    }){
-        if(_params.name===undefined||_params.name==='')_params.name=flogname;
-        if(_params.readconsole===undefined)_params.readconsole=false;
-        else _params.readconsole=!!_params.readconsole;
-        if(_params.writeconsole===undefined)_params.writeconsole=true;
-        else _params.writeconsole=!!_params.writeconsole;
-        if(_params.formatting===undefined)_params.formatting=true;
-        else _params.formatting=!!_params.formatting;
-        if(_params.prefix===undefined||_params.prefix==='')_params.prefix='\> ';
-        if(_params.nametag===undefined||_params.nametag==='')_params.nametag=_params.name;
-        if(_params.suffix===undefined||_params.suffix==='')_params.suffix=' \> ';
-        if(_params.logtag===undefined||_params.logtag==='')_params.logtag='\-\-';
-        if(_params.errtag===undefined||_params.errtag==='')_params.errtag='\!\!';
-        if(_params.warntag===undefined||_params.warntag==='')_params.warntag='\~\~';
-        if(_params.testtag===undefined||_params.testtag==='')_params.testtag='\?\?';
-        if(_params.emitname===undefined||_params.emitname==='')_params.emitname=flogname;
-        if(_params.save===undefined||!(_params.save instanceof Number))_params.save=100;
-        if(_params.lock===undefined)_params.lock=true;
-        else _params.lock=!!_params.lock;
-        const params=_params;
-        const conlog='console.log';
-        let socket=params.socket;
-        this.nametag=(()=>{params.nametag;})();
-        this.logtag=(()=>{params.logtag;})();
-        this.errtag=(()=>{params.errtag;})();
-        this.warntag=(()=>{params.warntag;})();
-        this.testtag=(()=>{params.testtag;})();
-        if(params.readconsole){
-            let Events=require('events');
-            let emitter=new Events.EventEmitter();
-            var fromconsole=false;
-            console.flog={};//extra
-            if(console.flog.io===undefined){
-                console.flog.io=[];
-                console.defaultLog=console.log.bind(console);
-                console.log=function(){
-                    console.flog.io.length=0;
-                    console.flog.io.push(Array.from(arguments));
-                    console.defaultLog.apply(console,arguments);
-                    emitter.emit(conlog,params.logtag);
-                }
-                console.defaultError=console.error.bind(console);
-                console.error=function(){
-                    console.flog.io.length=0;
-                    console.flog.io.push(Array.from(arguments));
-                    console.defaultError.apply(console,arguments);
-                    emitter.emit(conlog,params.errtag);
-                }
-                console.defaultWarn=console.warn.bind(console);
-                console.warn=function(){
-                    console.flog.io.length=0;
-                    console.flog.io.push(Array.from(arguments));
-                    console.defaultWarn.apply(console,arguments);
-                    emitter.emit(conlog,params.warntag);
-                }
-                console.defaultDebug=console.debug.bind(console);
-                console.debug=function(){
-                    console.flog.io.length=0;
-                    console.flog.io.push(Array.from(arguments));
-                    console.defaultDebug.apply(console,arguments);
-                    emitter.emit(conlog,params.testtag);
-                }
+    const io=function(
+        _config={
+            name:typeof 'string'
+            ,writeconsole:typeof 'boolean'
+            ,readconsole:typeof 'boolean'
+            ,sockets:typeof 'object'
+            ,emitname:typeof 'string'
+            ,parents:typeof 'object'
+            ,children:typeof 'object'          
+        }){
+        const self=this;
+        let newconfig={};
+        
+        if(_config.name===undefined||typeof _config.name!=='string')Object.defineProperty(newconfig,'name',{value:flogname,enumerable:true,writable:false});
+        else Object.defineProperty(newconfig,'name',{value:_config.name,enumerable:true,writable:false});
+        
+        if(_config.writeconsole===undefined||typeof _config.writeconsole!=='boolean')Object.defineProperty(newconfig,'writeconsole',{value:true,enumerable:true,writable:true});
+        else Object.defineProperty(newconfig,'writeconsole',{value:_config.writeconsole,enumerable:true,writable:false});
+        
+        if(_config.readconsole===undefined||typeof _config.readconsole!=='boolean')Object.defineProperty(newconfig,'readconsole',{value:false,enumerable:true,writable:true});
+        else Object.defineProperty(newconfig,'readconsole',{value:_config.readconsole,enumerable:true,writable:false});
+        
+        if(_config.sockets===undefined||typeof _config.sockets!=='object')Object.defineProperty(newconfig,'sockets',{value:[],enumerable:true,writable:true});
+        else{
+            let arr=[];
+            for(let i in _config.sockets){
+                if(typeof _config.sockets[i].sockets.emit==='function'){arr.push(_config.sockets[i]);}
+                else{console.log(_config.sockets[i],'^not a valid socket > emit is not a function');}
             }
-            emitter.on(conlog,(_tag)=>{
-                for(let i in console.flog.io){
-                    fromconsole=true;
-                    this.Print(console.flog.io[i],_tag,params);
-                }
-            });
+            Object.defineProperty(newconfig,'sockets',{value:arr,enumerable:true,writable:true});
         }
-        if(params.save>0){
-            var lines=[];
-            var save=params.save>0?true:false;
-            var saveformat=(params.formatting)?params.logtag+params.prefix:'';
-            var PushPop=(line,_params)=>{
-                let format=_params.formatting?_params.logtag+_params.prefix+_params.nametag+_params.suffix:saveformat;
-                if(line!==undefined){
-                    if(save){
-                        if(lines.length+1>params.save)lines.splice(0,lines.length+1-params.save);
-                        lines.push(format+line);
+
+        if(_config.emitname===undefined||typeof _config.emitname!=='string')Object.defineProperty(newconfig,'emitname',{value:flogname,enumerable:true,writable:true});
+        else Object.defineProperty(newconfig,'emitname',{value:_config.emitname,enumerable:true,writable:false});
+        
+        if(_config.parents===undefined||typeof _config.parents!=='object')Object.defineProperty(newconfig,'parents',{value:[],enumerable:true,writable:true});
+        else{
+            let arr=[];
+            for(let i in _config.parents){
+                if(_config.parents[i] instanceof io){arr.push(_config.parents[i]);}
+                else{console.log(_config.parents[i],'^not an instance of '+flogname);}
+            }
+            Object.defineProperty(newconfig,'parents',{value:arr,enumerable:true,writable:true});
+        }
+
+        if(_config.children===undefined||typeof _config.children!=='object')Object.defineProperty(newconfig,'children',{value:[],enumerable:true,writable:true});
+        else{
+            let arr=[];
+            for(let i in _config.children){
+                if(_config.children[i] instanceof io){arr.push(_config.children[i]);}
+                else{console.log(_config.children[i],'^not an instance of '+flogname);}
+            }
+            Object.defineProperty(newconfig,'children',{value:arr,enumerable:true,writable:true});
+        }
+
+        this.config=newconfig;
+        delete newconfig;
+        //==================================================================================================================
+        let send=(_msg)=>{
+            for(let s=0;s<this.config.sockets.length;s++){
+                if(typeof(_msg)==='object'){
+                    let temp='{';
+                    for(let i in _msg){
+                        if(typeof(_msg[i])==='function'){temp+=' '+i+': function,';}
+                        else {temp+=' '+i+': '+_msg[i]+',';}
                     }
+                    temp=temp.slice(0,temp.length-1);
+                    temp+=' }';
+                    this.config.sockets[s].emit(this.config.emitname,temp);
                 }
-                else if(lines.length>0){
-                    if(socket!==undefined)socket.emit(params.emitname,lines);
-                    lines.length=0;
-                    save=false;
+                else{this.config.sockets[s].emit(this.config.emitname,_msg);}
+            }
+        };
+        let _print=(_input,_fromconsole)=>{
+            if(typeof(_input)==='undefined'){_input='---empty print---';}
+            if(typeof(_fromconsole)!=='boolean'){_fromconsole=false;}  
+            for(let i in _input){
+                if(!this.config.readconsole){
+                    if(this.config.writeconsole){console.log(_input[i]);send(_input[i]);}
+                    else{send(_input[i]);}
                 }
-            };
-            PushPop('Begin '+params.name+' Save Dump',params);
-        }
-        let _Print=(_msg,_tag,_config)=>{
-            let _config_={};
-            if(_config===undefined)_config_=params;
-            else{
-                _config_.readconsole=!!_config.readconsole;
-                _config_.writeconsole=!!_config.writeconsole;
-                _config_.formatting=!!_config.formatting;
-                _config_.prefix=''+_config.prefix;
-                _config_.nametag=''+_config.nametag;
-                _config_.suffix=''+_config.suffix;
-                _config_.logtag=''+_config.logtag;
-                _config_.errtag=''+_config.errtag;
-                _config_.warntag=''+_config.warntag;
-                _config_.testtag=''+_config.testtag;
-                _config_.emitname=''+_config.emitname;
-                _config_.save=(_config.save instanceof Number)?_config.save:100;
-            }
-            if(fromconsole){
-                PushPop(_msg,_config_);
-                if(socket!==undefined)socket.emit(_config_.emitname,[_msg]);
-                fromconsole=false;
-            }
-            else{
-                let msg=_msg;
-                if(_config_.formatting!==undefined&&_config_.formatting)msg=_tag+_config_.prefix+_config_.nametag+_config_.suffix+_msg;
-                if(!params.readconsole){
-                    PushPop(_msg,_config_);
-                    if(socket!==undefined)socket.emit(_config_.emitname,[msg]);
+                else{
+                    if(this.config.writeconsole){
+                        if(!_fromconsole){console.log(_input[i]);}
+                        else{send(_input[i]);}
+                    }
+                    else{send(_input[i]);}
                 }
-                if(_config_.writeconsole)console.log(msg);
-                msg=undefined;
             }
-        return};
-        this.GetName=()=>''+params.name;
-        this.GetParams=()=>{let temp=params;delete temp.socket;return temp;}
-        this.Print=(_msg,_tag,_params)=>{
-            if(_msg===undefined)_msg='empty Print()';
-            if(_tag===undefined)_tag=params.logtag;
-            if(_params===undefined)_params=params;
-            _Print(_msg,_tag,_params);
-        }
-        this.SetSocket=(_socket,_tag)=>{
-            if(_tag===undefined||!(_tag instanceof String))_tag=params.errtag;
-            if(socket===undefined||!params.lock){
-                socket=_socket;
-                let testtags=params.formatting?_tag+params.prefix+this.GetName()+params.suffix:'';
-                socket.emit(params.emitname,[testtags+'socket test message']);
-                let tempmsg='socket set';
-                if(params.lock)tempmsg+=' and locked';
-                else tempmsg+=' and unlocked';
-                _Print(tempmsg,_tag,params);
-                PushPop('End '+params.name+' Socket-Init Package',params);
-                PushPop(undefined,params);
-                _Print('saved flog dumped to socket',_tag,params);
+        };
+        this.print=function(){
+            try{
+                let arr=Array.from(arguments);
+                _print(arr,false);
+                for(let i in self.config.parents){
+                    for(let j=0;j<arr.length;j++){self.config.parents[i](arr[j]);}
+                }
             }
-            else _Print('socket locked',_tag);
-        return;};
-        this.AddChild=(_child,_params_)=>{
+            catch(err){console.log(err,self.config.name+'.print() error > check arguments:',arguments);}
+        };
+        this.addsocket=(_socket)=>{
+            try{
+                if(typeof _socket.emit==='function'){
+                    this.config.sockets.push(_socket);
+                    this.print('socket set');
+                }
+                else this.print(_socket,'^not a valid socket > emit is not a function');
+            }
+            catch(err){console.log(err);}
+        };
+        let family=(obj)=>{
+            for(let i in this.config.children)if(i===obj)return true;
+            for(let i in this.config.parents)if(i===obj)return true;
+        };
+        this.addchild=(_child)=>{
             if(_child instanceof flog.io){
-                let old=_child.Print;
-                _child.Print=function(_msg,_tag,_params){
-                    if(_tag===undefined)_tag=params.logtag;
-                    if(_params===undefined)_params=_params_;
-                    if(_params===undefined)_params=params;
-                    _params.writeconsole=true;
-                    old(_msg,_tag,_params);
-                    _params.writeconsole=false;
-                   fromconsole=false;
-                    _Print(_msg,_tag,_params);
-                };
-                _Print(params.name+'.AddChild('+_child.GetName()+')',params.warntag,params);
+                if(!family(_child)){
+                    _child.config.writeconsole=false;
+                    _child.config.parents.push(this.print);
+                }
             }
-            else _Print(params.name+'.AddChild() \>'+_child+' not '+flogname+' object',params.warntag,params.errtag);
-        return;};
+            else this.print(this.config.name+'.add() ->',_child,'^not an instance of '+flogname);
+        };
+        this.addparent=(_parent)=>{
+            if(_parent instanceof flog.io){
+                if(!family(_parent)){
+                    this.config.writeconsole=false;
+                    this.config.parents.push(_parent.print);
+                }
+            }
+            else this.print(this.config.name+'.add() ->',_parent,'^not an instance of '+flogname);
+        };
+        //==================================================================================================================
+        if(this.config.readconsole){
+            let oldlog=console.log;console.log=function(){oldlog.apply(this,arguments);_print(_msg=Array.from(arguments),true);}
+            let olderr=console.error;console.error=function(){olderr.apply(console,arguments);_print(Array.from(arguments),true);}
+            let oldwarn=console.warn;console.warn=function(){oldwarn.apply(console,arguments);_print(Array.from(arguments),true);}
+            let olddeb=console.debug;console.debug=function(){olddeb.apply(console,arguments);_print(Array.from(arguments),true);}
+        }
+        if(this.config.sockets.length>0){
+            let socks=this.config.sockets;
+            this.config.sockets=[];
+            for(let i=0;i<socks.length;i++){this.addsocket(socks[i]);}
+        }
+        if(this.config.children.length>0){
+            let kids=this.config.children;
+            this.config.children=[];
+            for(let i=0;i<kids.length;i++){this.addchild(kids[i]);}
+        }
+        if(this.config.parents.length>0){
+            let rents=this.config.parents;
+            this.config.parents=[];
+            for(let i=0;i<rents.length;i++){this.addparent(rents[i]);}
+        }
     };
-return {io};
-})();
+return{io};})();
 module.exports=flog;
