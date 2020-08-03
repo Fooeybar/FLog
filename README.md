@@ -6,7 +6,7 @@ The nested structure allows for a more varied console.log() usage.<br/>
 Replace your console.log() calls with yourvariable.print(), or use them together.<br/>
 
 <br/>
-v3.0.1<br/>
+v3.1.0<br/>
 -
 ---added remove() function<br/>
 ---multiple socket support<br/>
