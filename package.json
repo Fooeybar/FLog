@@ -1,6 +1,6 @@
 {
   "name": "flog.io",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Nest-able Logging Object For Sockets",
   "main": "flog.io.js",
   "scripts": {
@@ -29,7 +29,10 @@
     "logging",
     "Websockets",
     "websockets",
-    "ws"
+    "ws",
+    "console.log",
+    "console log",
+    "console"
   ],
   "author": "Fooeybar",
   "license": "MIT",

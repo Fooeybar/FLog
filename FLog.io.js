@@ -184,18 +184,20 @@ const flog=(()=>{
             let socks=this.config.sockets;
             this.config.sockets=[];
             for(let i=0;i<socks.length;i++){this.addsocket(socks[i]);}
+            delete socks;
         }
         if(this.config.children.length>0){
             let kids=this.config.children;
             this.config.children=[];
             for(let i=0;i<kids.length;i++){this.addchild(kids[i]);}
+            delete kids;
         }
         if(this.config.parents.length>0){
             let rents=this.config.parents;
             this.config.parents=[];
             for(let i=0;i<rents.length;i++){this.addparent(rents[i]);}
+            delete rents;
         }
     };
 return{io};})();
 module.exports=flog;
-module.exports.default=flog;
