@@ -15,82 +15,87 @@ const flog=(()=>{
             try{
                 let arr=Array.from(arguments);
                 _print(arr,false);
-                for(let i in self.config.parents){
-                    for(let j=0;j<arr.length;j++){self.config.parents[i](arr[j]);}
+                for(let i in this.config.parents){
+                    for(let j=0;j<arr.length;j++){this.config.parents[i].print(arr[j]);}
                 }
             }
-            catch(err){console.log(err,self.config.name+'.print() error > check arguments:',arguments);}
+            catch(err){console.log(err,this.config.name+'.print() error > check arguments:',arguments);}
         };
         this.addsocket=(_socket)=>{
-            if(typeof _socket.emit==='undefined')this.print(_socket,'^emit: not found');
-            else if(typeof _socket.emit==='function'){
+            try{
+                if(typeof _socket.emit==='undefined'){this.print(_socket,'^emit: not found');return false;}
+                if(typeof _socket.emit!=='function'){this.print(_socket,'^emit: not a function');return false;}
                 for(let i=0;i<this.config.sockets.length;i++){
-                    if(this.config.sockets[i]===_socket){
-                        this.print(this.config.name+'.addsocket() ->',_socket,'^duplicate socket');
-                        return;
-                    }}
-                try{if(send('test message',true,_socket))this.config.sockets.push(_socket);}
-                catch(err){this.print(err);}
+                    if(this.config.sockets[i]!==_socket){continue;}
+                    this.print(this.config.name+'.addsocket() -> duplicate socket');
+                    return false;
+                }
+                if(send('test message',true,_socket))this.config.sockets.push(_socket);
             }
-            else this.print(_socket,'^emit: not a function');
+            catch(err){this.print(err);}
         };
         this.addchild=(_child)=>{
-            if(_child instanceof flog.io){
-                if(!family(_child)){
-                    _child.config.writeconsole=false;
-                    _child.config.parents.push(this.print);
-                    this.config.children.push(_child);
-                }
-                else{this.print(_child,'^already a child');}
+            try{
+                if(!(_child instanceof flog.io)){this.print(this.config.name+'.addchild(',_child,') -> not an instance of '+flogname);return false;}
+                if(parentcheck(_child)){this.print(this.config.name+'.addchild(\''+_child.config.name+'\') -> already a child');return false;}
+                _child.addparent(this);
             }
-            else this.print(this.config.name+'.addchild() ->',_child,'^not an instance of '+flogname);
+            catch(err){this.print(err);}
         };
         this.addparent=(_parent)=>{
-            if(_parent instanceof flog.io){
-                if(!family(_parent)){
-                    this.config.writeconsole=false;
-                    this.config.parents.push(_parent.print);
-                    _parent.config.children.push(this);
-                }
-                else{this.print(_parent,'^already a parent');}
+            try{
+                if(_parent===this){this.print(this.config.name+'.addparent(\''+this.config.name+'\') -> cannot be parent of itself');return false;}
+                if(!(_parent instanceof flog.io)){this.print(this.config.name+'.addparent(',_parent,') -> not an instance of '+flogname);return false;}
+                if(parentcheck(_parent)){this.print(this.config.name+'.addparent(\''+_parent.config.name+'\') -> already a parent');return false;}
+                this.config.parents.push(_parent);
+                this.config.writeconsole=false;
             }
-            else this.print(this.config.name+'.addparent() ->',_parent,'^not an instance of '+flogname);
+            catch(err){this.print(err);}
         };
-        this.remove=(_obj)=>{
-            if(_removesocket(_obj)){return;}
-            if(_removechild(_obj)){return;}
-            if(_removeparent(_obj)){return;}
-            {this.print(this.config.name+'.remove() ->',_obj,'^not found');}
+        this.removesocket=(_socket)=>{
+            try{
+                for(let i=0;i<this.config.sockets.length;i++){
+                    if(this.config.sockets[i]===_socket){
+                        this.config.sockets.splice(i,1);
+                        return true;
+                    }
+                }
+                return false;
+            }
+            catch(err){this.print(err);}
+        };
+        this.removechild=(_child)=>{
+            try{
+                if(!(_child instanceof io)){this.print(this.config.name+'.removechild(',_child,') -> not an instance of '+flogname);return false;}
+                if(!_child.removeparent(self)){return false;}
+                if(_child.config.parents.length===0){_child.config.writeconsole=_child.config.writeinit;}
+                return true;
+            }
+            catch(err){this.print(err);}
+        };
+        this.removeparent=(_parent)=>{
+            try{
+                if(!(_parent instanceof io)){this.print(this.config.name+'.removeparent(',_parent,') -> not an instance of '+flogname);return false;}
+                for(let i=0;i<this.config.parents.length;i++){
+                    if(this.config.parents[i]!==_parent){continue;}
+                    this.config.parents.splice(i,1);
+                    if(this.config.parents.length===0){this.config.writeconsole=this.config.writeinit;}
+                    return true;
+                }
+                this.print(this.config.name+'.removeparent(\''+_parent.config.name+'\') -> not found');
+                return false;
+            }
+            catch(err){this.print(err);}
         };
         //===================================================
-        let _removesocket=(_socket)=>{
-            for(let i=0;i<this.config.sockets.length;i++){
-                if(this.config.sockets[i]===_socket){
-                    this.config.sockets.splice(i,1);
-                    return true;
+        let parentcheck=(_obj)=>{
+            try{
+                for(let i=0;i<this.config.parents.length;i++){
+                    if(this.config.parents[i]===_obj){return true;}
                 }
+                return false;
             }
-            return false;
-        };
-        let _removechild=(_child)=>{
-            for(let i=0;i<this.config.children.length;i++){
-                if(this.config.children[i]===_child){
-                    this.config.children.splice(i,1);
-                    if(_child.config.parents.length===0)_child.config.writeconsole=true;
-                    return true;
-                }
-            }
-            return false;
-        };
-        let _removeparent=(_parent)=>{
-            for(let i=0;i<this.config.parents.length;i++){
-                if(this.config.parents[i]===_parent){
-                    this.config.parents.splice(i,1);
-                    if(this.config.parents.length===0){this.config.writeconsole=true;}
-                    return true;
-                }
-            }
-            return false;
+            catch(err){this.print(err);}
         };
         let send=(_msg,test,sock)=>{
             let emit=(socket,msg)=>{
@@ -98,106 +103,111 @@ const flog=(()=>{
                 catch(err){this.print(err);return false;}
             };
             if(test){return emit(sock,_msg);}
-            for(let s=0;s<this.config.sockets.length;s++){
-                if(typeof(_msg)==='object'){
-                    let temp='{';
-                    for(let i in _msg){temp+=(typeof(_msg[i])==='function')?(' '+i+': function,'):(' '+i+': '+_msg[i]+',');}
-                    temp=temp.slice(0,temp.length-1);
-                    temp+=' }';
-                    emit(this.config.sockets[s],temp);
+            try{
+                for(let s=0;s<this.config.sockets.length;s++){
+                    if(typeof(_msg)==='object'){
+                        let temp='{';
+                        for(let i in _msg){temp+=(typeof(_msg[i])==='function')?(' '+i+': function,'):(' '+i+': '+_msg[i]+',');}
+                        temp=temp.slice(0,temp.length-1);
+                        temp+=' }';
+                        emit(this.config.sockets[s],temp);
+                    }
+                    else{emit(this.config.sockets[s],_msg);}
                 }
-                else{emit(this.config.sockets[s],_msg);}
             }
+            catch(err){this.print(err);}
         };
         let _print=(_input,_fromconsole)=>{
-            if(typeof(_input)==='undefined'){_input='---empty print---';}
-            if(typeof(_fromconsole)!=='boolean'){_fromconsole=false;}  
-            for(let i in _input){
-                if(!this.config.readconsole){
-                    if(this.config.writeconsole){console.log(_input[i]);send(_input[i]);}
-                    else{send(_input[i]);}
-                }
-                else{
-                    if(this.config.writeconsole){
-                        if(!_fromconsole){console.log(_input[i]);}
+            try{
+                if(typeof(_input)==='undefined'){_input='---empty print---';}
+                if(typeof(_fromconsole)!=='boolean'){_fromconsole=false;}  
+                for(let i in _input){
+                    if(!this.config.readconsole){
+                        if(this.config.writeconsole){console.log(_input[i]);send(_input[i]);}
                         else{send(_input[i]);}
                     }
-                    else{send(_input[i]);}
+                    else{
+                        if(this.config.writeconsole){
+                            if(!_fromconsole){console.log(_input[i]);}
+                            else{send(_input[i]);}
+                        }
+                        else{send(_input[i]);}
+                    }
                 }
             }
-        };
-        let family=(obj)=>{
-            for(let i=0;i<this.config.children.length;i++)if(this.config.children[i]===obj){return true;}
-            for(let i=0;i<this.config.parents.length;i++)if(this.config.parents[i]===obj){return true;}
-            return false;
+            catch(err){this.print(err);}
         };
         //==================================================================================================================
-        let newconfig={};
-        if(_config.name===undefined||typeof _config.name!=='string')Object.defineProperty(newconfig,'name',{value:flogname,enumerable:true,writable:false});
-        else Object.defineProperty(newconfig,'name',{value:_config.name,enumerable:true,writable:false});
+        this.config={};
 
-        if(_config.writeconsole===undefined||typeof _config.writeconsole!=='boolean')Object.defineProperty(newconfig,'writeconsole',{value:true,enumerable:true,writable:true});
-        else Object.defineProperty(newconfig,'writeconsole',{value:_config.writeconsole,enumerable:true,writable:false});
+        if(_config.name===undefined||typeof _config.name!=='string')Object.defineProperty(this.config,'name',{value:flogname,enumerable:true,writable:false});
+        else Object.defineProperty(this.config,'name',{value:_config.name,enumerable:true,writable:false});
 
-        if(_config.readconsole===undefined||typeof _config.readconsole!=='boolean')Object.defineProperty(newconfig,'readconsole',{value:false,enumerable:true,writable:false});
-        else Object.defineProperty(newconfig,'readconsole',{value:_config.readconsole,enumerable:true,writable:false});
+        if(_config.writeconsole===undefined||typeof _config.writeconsole!=='boolean')Object.defineProperty(this.config,'writeconsole',{value:true,enumerable:true,writable:true});
+        else Object.defineProperty(this.config,'writeconsole',{value:_config.writeconsole,enumerable:true,writable:false});
+        Object.defineProperty(this.config,'writeinit',{value:this.config.writeconsole,enumerable:true,writable:false});
 
-        if(_config.sockets===undefined||typeof _config.sockets!=='object')Object.defineProperty(newconfig,'sockets',{value:[],enumerable:true,writable:true});
-        else Object.defineProperty(newconfig,'sockets',{value:_config.sockets,enumerable:true,writable:true});
+        if(_config.readconsole===undefined||typeof _config.readconsole!=='boolean')Object.defineProperty(this.config,'readconsole',{value:false,enumerable:true,writable:false});
+        else Object.defineProperty(this.config,'readconsole',{value:_config.readconsole,enumerable:true,writable:false});
 
-        if(_config.emitname===undefined||typeof _config.emitname!=='string')Object.defineProperty(newconfig,'emitname',{value:flogname,enumerable:true,writable:false});
-        else Object.defineProperty(newconfig,'emitname',{value:_config.emitname,enumerable:true,writable:false});
+        if(_config.sockets===undefined||!(Array.isArray(_config.sockets)))Object.defineProperty(this.config,'sockets',{value:[],enumerable:true,writable:true});
+        else Object.defineProperty(this.config,'sockets',{value:_config.sockets,enumerable:true,writable:true});
 
-        if(_config.parents===undefined||typeof _config.parents!=='object')Object.defineProperty(newconfig,'parents',{value:[],enumerable:true,writable:true});
-        else Object.defineProperty(newconfig,'parents',{value:_config.parents,enumerable:true,writable:true});
+        if(_config.emitname===undefined||typeof _config.emitname!=='string')Object.defineProperty(this.config,'emitname',{value:flogname,enumerable:true,writable:false});
+        else Object.defineProperty(this.config,'emitname',{value:_config.emitname,enumerable:true,writable:false});
 
-        if(_config.children===undefined||typeof _config.children!=='object')Object.defineProperty(newconfig,'children',{value:[],enumerable:true,writable:true});
-        else Object.defineProperty(newconfig,'children',{value:_config.children,enumerable:true,writable:true});
-
-        this.config=newconfig;
-        delete newconfig;
-        const self=this;
+        if(_config.parents===undefined||!(Array.isArray(_config.parents)))Object.defineProperty(this.config,'parents',{value:[],enumerable:true,writable:true});
+        else Object.defineProperty(this.config,'parents',{value:_config.parents,enumerable:true,writable:true});
 
         if(this.config.readconsole){
-            let oldlog=console.log;
-            console.log=function(){
-                oldlog.apply(this,arguments);
-                _print(_msg=Array.from(arguments),true);
+            try{
+                let oldlog=console.log;
+                console.log=function(){
+                    oldlog.apply(this,arguments);
+                    _print(_msg=Array.from(arguments),true);
+                }
+                let olderr=console.error;
+                console.error=function(){
+                    olderr.apply(console,arguments);
+                    _print(Array.from(arguments),true);
+                }
+                let oldwarn=console.warn;
+                console.warn=function(){
+                    oldwarn.apply(console,arguments);
+                    _print(Array.from(arguments),true);
+                }
+                let olddeb=console.debug;
+                console.debug=function(){
+                    olddeb.apply(console,arguments);
+                    _print(Array.from(arguments),true);
+                }
             }
-            let olderr=console.error;
-            console.error=function(){
-                olderr.apply(console,arguments);
-                _print(Array.from(arguments),true);
-            }
-            let oldwarn=console.warn;
-            console.warn=function(){
-                oldwarn.apply(console,arguments);
-                _print(Array.from(arguments),true);
-            }
-            let olddeb=console.debug;
-            console.debug=function(){
-                olddeb.apply(console,arguments);
-                _print(Array.from(arguments),true);
-            }
+            catch(err){this.print(err);}
         }
         if(this.config.sockets.length>0){
-            let socks=this.config.sockets;
-            this.config.sockets=[];
-            for(let i=0;i<socks.length;i++){this.addsocket(socks[i]);}
-            delete socks;
-        }
-        if(this.config.children.length>0){
-            let kids=this.config.children;
-            this.config.children=[];
-            for(let i=0;i<kids.length;i++){this.addchild(kids[i]);}
-            delete kids;
+            try{
+                let socks=this.config.sockets;
+                this.config.sockets=[];
+                for(let i=0;i<socks.length;i++){this.addsocket(socks[i]);}
+                delete socks;
+            }
+            catch(err){this.print(err);}
         }
         if(this.config.parents.length>0){
-            let rents=this.config.parents;
-            this.config.parents=[];
-            for(let i=0;i<rents.length;i++){this.addparent(rents[i]);}
-            delete rents;
+            try{
+                let rents=this.config.parents;
+                this.config.parents=[];
+                for(let i=0;i<rents.length;i++){this.addparent(rents[i]);}
+                delete rents;
+            }
+            catch(err){this.print(err);}
+        }        
+        let self=this;
+        if(_config.children!==undefined&&Array.isArray(_config.children)){
+            try{for(let i=0;i<_config.children.length;i++){_config.children[i].addparent(this);}}
+            catch(err){this.print(err);}
         }
+        
     };
 return{io};})();
 module.exports=flog;

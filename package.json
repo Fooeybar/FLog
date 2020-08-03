@@ -1,7 +1,7 @@
 {
   "name": "flog.io",
-  "version": "3.1.0",
-  "description": "Extended Console.log Factory // Nested And Socket Logging",
+  "version": "3.1.1",
+  "description": "Extended Console.log // Nested And Socket Logging",
   "main": "flog.io.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,23 +11,14 @@
     "url": "git+https://github.com/Fooeybar/flog.io.git"
   },
   "keywords": [
-    "Socket.io",
     "socket.io",
-    "Sockets",
     "sockets",
-    "Socket",
     "socket",
-    "Log",
     "log",
-    "FLog",
     "flog",
-    "FLog.io",
     "flog.io",
-    "Log.io",
     "log.io",
-    "Logging",
     "logging",
-    "Websockets",
     "websockets",
     "ws",
     "console.log",
