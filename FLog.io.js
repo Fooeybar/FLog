@@ -25,20 +25,24 @@ const flog=(()=>{
             try{
                 if(typeof _socket.emit==='undefined'){this.print(_socket,'^emit: not found');return false;}
                 if(typeof _socket.emit!=='function'){this.print(_socket,'^emit: not a function');return false;}
-                for(let i=0;i<this.config.sockets.length;i++){
-                    if(this.config.sockets[i]!==_socket){continue;}
+                if(family(this.config.sockets,_socket,'add')){
                     this.print(this.config.name+'.addsocket() -> duplicate socket');
                     return false;
                 }
-                if(send('test message',true,_socket))this.config.sockets.push(_socket);
+                send('test message',true,_socket);
             }
             catch(err){this.print(err);}
         };
         this.addchild=(_child)=>{
             try{
+                if(_child===this){this.print(this.config.name+'.addchild(\''+this.config.name+'\') -> cannot be child of itself');return false;}
                 if(!(_child instanceof flog.io)){this.print(this.config.name+'.addchild(',_child,') -> not an instance of '+flogname);return false;}
-                if(parentcheck(_child)){this.print(this.config.name+'.addchild(\''+_child.config.name+'\') -> already a child');return false;}
-                _child.addparent(this);
+                if(family(this.config.parents,_child)){this.print(this.config.name+'.addchild(\''+_child.config.name+'\') -> already a parent');return false;}
+                if(family(_child.config.children,this)){this.print(_child.config.name+'.addparent(\''+this.config.name+'\') -> already a child');return false;}
+                if(family(this.config.children,_child,'add')){this.print(this.config.name+'.addchild(\''+_child.config.name+'\') -> already a child');return false;}
+                if(family(_child.config.parents,this,'add')){this.print(_child.config.name+'.addparent(\''+this.config.name+'\') -> already a parent');return false;}
+                _child.config.writeconsole=false;
+                return true;
             }
             catch(err){this.print(err);}
         };
@@ -46,28 +50,28 @@ const flog=(()=>{
             try{
                 if(_parent===this){this.print(this.config.name+'.addparent(\''+this.config.name+'\') -> cannot be parent of itself');return false;}
                 if(!(_parent instanceof flog.io)){this.print(this.config.name+'.addparent(',_parent,') -> not an instance of '+flogname);return false;}
-                if(parentcheck(_parent)){this.print(this.config.name+'.addparent(\''+_parent.config.name+'\') -> already a parent');return false;}
-                this.config.parents.push(_parent);
+                if(family(this.config.children,_parent)){this.print(this.config.name+'.addparent(\''+_parent.config.name+'\') -> already a child');return false;}
+                if(family(_parent.config.parents,this)){this.print(_parent.config.name+'.addparent(\''+this.config.name+'\') -> already a parent');return false;}
+                if(family(this.config.parents,_parent,'add')){this.print(this.config.name+'.addparent(\''+_parent.config.name+'\') -> already a parent');return false;}
+                if(family(_parent.config.children,this,'add')){this.print(_parent.config.name+'.addparent(\''+this.config.name+'\') -> already a child');return false;}
                 this.config.writeconsole=false;
+                return true;
             }
             catch(err){this.print(err);}
         };
         this.removesocket=(_socket)=>{
             try{
-                for(let i=0;i<this.config.sockets.length;i++){
-                    if(this.config.sockets[i]===_socket){
-                        this.config.sockets.splice(i,1);
-                        return true;
-                    }
-                }
-                return false;
+                if(!family(this.config.sockets,_socket,'delete')){this.print(this.config.name+'.removesocket(\''+''+'\') -> socket not found');return false;}
+                return true;
             }
             catch(err){this.print(err);}
         };
         this.removechild=(_child)=>{
             try{
+                if(typeof(_child)==='undefined'){return false;}
                 if(!(_child instanceof io)){this.print(this.config.name+'.removechild(',_child,') -> not an instance of '+flogname);return false;}
-                if(!_child.removeparent(self)){return false;}
+                if(!family(this.config.children,_child,'delete')){this.print(this.config.name+'.removeparent(\''+_child.config.name+'\') -> child not found');}
+                if(!family(_child.config.parents,this,'delete')){this.print(this.config.name+'.removeparent(\''+_child.config.name+'\') -> parent not found');}
                 if(_child.config.parents.length===0){_child.config.writeconsole=_child.config.writeinit;}
                 return true;
             }
@@ -75,24 +79,26 @@ const flog=(()=>{
         };
         this.removeparent=(_parent)=>{
             try{
+                if(typeof(_parent)==='undefined'){return false;}
                 if(!(_parent instanceof io)){this.print(this.config.name+'.removeparent(',_parent,') -> not an instance of '+flogname);return false;}
-                for(let i=0;i<this.config.parents.length;i++){
-                    if(this.config.parents[i]!==_parent){continue;}
-                    this.config.parents.splice(i,1);
-                    if(this.config.parents.length===0){this.config.writeconsole=this.config.writeinit;}
-                    return true;
-                }
-                this.print(this.config.name+'.removeparent(\''+_parent.config.name+'\') -> not found');
-                return false;
+                if(!family(_parent.config.children,this,'delete')){this.print(this.config.name+'.removeparent(\''+_parent.config.name+'\') -> child not found');}                
+                if(!family(this.config.parents,_parent,'delete')){this.print(this.config.name+'.removeparent(\''+_parent.config.name+'\') -> parent not found');}
+                if(this.config.parents.length===0){this.config.writeconsole=this.config.writeinit;}
+                return true;
             }
             catch(err){this.print(err);}
         };
         //===================================================
-        let parentcheck=(_obj)=>{
+        let family=(arr,_obj,mod='')=>{
             try{
-                for(let i=0;i<this.config.parents.length;i++){
-                    if(this.config.parents[i]===_obj){return true;}
+                for(let i=0;i<arr.length;i++){
+                    if(arr[i]===_obj){
+                        if(mod==='return'){return arr[i];}
+                        if(mod==='delete'){arr.splice(i,1);}
+                        return true;
+                    }
                 }
+                if(mod==='add'){arr.push(_obj);}
                 return false;
             }
             catch(err){this.print(err);}
@@ -159,6 +165,9 @@ const flog=(()=>{
         if(_config.parents===undefined||!(Array.isArray(_config.parents)))Object.defineProperty(this.config,'parents',{value:[],enumerable:true,writable:true});
         else Object.defineProperty(this.config,'parents',{value:_config.parents,enumerable:true,writable:true});
 
+        if(_config.children===undefined||!(Array.isArray(_config.children)))Object.defineProperty(this.config,'children',{value:[],enumerable:true,writable:true});
+        else Object.defineProperty(this.config,'children',{value:_config.children,enumerable:true,writable:true});
+
         if(this.config.readconsole){
             try{
                 let oldlog=console.log;
@@ -201,13 +210,17 @@ const flog=(()=>{
                 delete rents;
             }
             catch(err){this.print(err);}
-        }        
-        let self=this;
-        if(_config.children!==undefined&&Array.isArray(_config.children)){
-            try{for(let i=0;i<_config.children.length;i++){_config.children[i].addparent(this);}}
+        }
+        if(this.config.children.length>0){
+            try{
+                let kids=this.config.children;
+                this.config.children=[];               
+                for(let i=0;i<kids.length;i++){this.addchild(kids[i]);}
+                delete kids;
+            }
             catch(err){this.print(err);}
         }
-        
+
     };
 return{io};})();
 module.exports=flog;

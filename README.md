@@ -6,6 +6,11 @@ The nested structure allows for a more varied console.log() usage.<br/>
 Replace your console.log() calls with flog.io.print(), or use them together.<br/>
 
 <br/>
+v3.1.2<br/>
+-
+---improved .addchild()/.addparent() checking of existing flog<br/>
+
+<br/>
 v3.1.1<br/>
 -
 ---removed .remove() function<br/>
@@ -62,12 +67,3 @@ To use parent-child structure logging of multiple logs,<br/>
 ---log.addchild(child) -> add a child log, the child.print() calls will also call the parent.print()<br/>
 ---log.addparent(parent) -> add a parent log, similar to above<br/>
 ---parents/children can also be added at instantiation<br/>
-
-Future edits will include:<br/>
----file logging (in progress)<br/>
----async option<br/>
-<br/>
-
-Version 3.1.1+ is the working version.<br/>
-
-

@@ -1,6 +1,6 @@
 {
   "name": "flog.io",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "description": "Extended Console.log // Nested And Socket Logging",
   "main": "flog.io.js",
   "scripts": {
