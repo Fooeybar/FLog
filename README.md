@@ -6,21 +6,15 @@ The nested structure allows for a more varied console.log() usage.<br/>
 Replace your console.log() calls with flog.io.print(), or use them together.<br/>
 
 <br/>
+v3.1.3<br/>
+-
+---added branch checking of existing flog to prevent circular references<br/>
+
+<br/>
 v3.1.2<br/>
 -
 ---improved .addchild()/.addparent() checking of existing flog<br/>
-
-<br/>
-v3.1.1<br/>
--
----removed .remove() function<br/>
----added .removesocket()<br/>
----added .removechild()<br/>
----added .removeparent()<br/>
----added try/catch blocks<br/>
-
-
-<br/>
+<br/><br/>
 
 npm install flog.io
 
@@ -45,13 +39,13 @@ name:'flog.io'<br/>
 <br/>
 
 Functions:<br/>
-print(arguments)<br/>
-addsocket(socket)<br/>
-addchild(child)<br/>
-addparent(parent)<br/>
-removesocket(socket)<br/>
-removechild(child)<br/>
-removeparent(parent)<br/>
+.print(arguments)<br/>
+.addsocket(socket)<br/>
+.addchild(child)<br/>
+.addparent(parent)<br/>
+.removesocket(socket)<br/>
+.removechild(child)<br/>
+.removeparent(parent)<br/>
 <br/>
 Using print():<br/>
 ---using a comma between arguments will start a new line<br/>

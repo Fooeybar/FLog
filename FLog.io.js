@@ -1,5 +1,6 @@
 const flog=(()=>{
     const flogname='flog.io';
+    const arrow=' >> ';
     const io=function(
         _config={
             name:typeof 'string'
@@ -8,100 +9,98 @@ const flog=(()=>{
             ,sockets:typeof 'object'
             ,emitname:typeof 'string'
             ,parents:typeof 'object'
-            ,children:typeof 'object'          
+            ,children:typeof 'object'
         }){
         //==================================================================================================================
         this.print=function(){
-            try{
-                let arr=Array.from(arguments);
-                _print(arr,false);
-                for(let i in this.config.parents){
-                    for(let j=0;j<arr.length;j++){this.config.parents[i].print(arr[j]);}
-                }
+            let arr=Array.from(arguments);
+            _print(arr,false);
+            for(let i in this.config.parents){
+                for(let j=0;j<arr.length;j++){this.config.parents[i].print(arr[j]);}
             }
-            catch(err){console.log(err,this.config.name+'.print() error > check arguments:',arguments);}
         };
         this.addsocket=(_socket)=>{
-            try{
-                if(typeof _socket.emit==='undefined'){this.print(_socket,'^emit: not found');return false;}
-                if(typeof _socket.emit!=='function'){this.print(_socket,'^emit: not a function');return false;}
-                if(family(this.config.sockets,_socket,'add')){
-                    this.print(this.config.name+'.addsocket() -> duplicate socket');
+            if(typeof _socket.emit==='undefined'){this.print(_socket,'^emit: not found');return false;}
+            if(typeof _socket.emit!=='function'){this.print(_socket,'^emit: not a function');return false;}
+            for(let i=0;i<this.config.sockets.length;i++){
+                if(this.config.sockets[i]===_socket){
+                    this.print(this.config.name+'.addsocket()'+arrow+'duplicate socket');
                     return false;
                 }
-                send('test message',true,_socket);
             }
-            catch(err){this.print(err);}
-        };
-        this.addchild=(_child)=>{
-            try{
-                if(_child===this){this.print(this.config.name+'.addchild(\''+this.config.name+'\') -> cannot be child of itself');return false;}
-                if(!(_child instanceof flog.io)){this.print(this.config.name+'.addchild(',_child,') -> not an instance of '+flogname);return false;}
-                if(family(this.config.parents,_child)){this.print(this.config.name+'.addchild(\''+_child.config.name+'\') -> already a parent');return false;}
-                if(family(_child.config.children,this)){this.print(_child.config.name+'.addparent(\''+this.config.name+'\') -> already a child');return false;}
-                if(family(this.config.children,_child,'add')){this.print(this.config.name+'.addchild(\''+_child.config.name+'\') -> already a child');return false;}
-                if(family(_child.config.parents,this,'add')){this.print(_child.config.name+'.addparent(\''+this.config.name+'\') -> already a parent');return false;}
-                _child.config.writeconsole=false;
-                return true;
-            }
-            catch(err){this.print(err);}
-        };
-        this.addparent=(_parent)=>{
-            try{
-                if(_parent===this){this.print(this.config.name+'.addparent(\''+this.config.name+'\') -> cannot be parent of itself');return false;}
-                if(!(_parent instanceof flog.io)){this.print(this.config.name+'.addparent(',_parent,') -> not an instance of '+flogname);return false;}
-                if(family(this.config.children,_parent)){this.print(this.config.name+'.addparent(\''+_parent.config.name+'\') -> already a child');return false;}
-                if(family(_parent.config.parents,this)){this.print(_parent.config.name+'.addparent(\''+this.config.name+'\') -> already a parent');return false;}
-                if(family(this.config.parents,_parent,'add')){this.print(this.config.name+'.addparent(\''+_parent.config.name+'\') -> already a parent');return false;}
-                if(family(_parent.config.children,this,'add')){this.print(_parent.config.name+'.addparent(\''+this.config.name+'\') -> already a child');return false;}
-                this.config.writeconsole=false;
-                return true;
-            }
-            catch(err){this.print(err);}
+            if(!send('test message',true,_socket)){return false;}
+            this.config.sockets.push(_socket);
+            return true;
         };
         this.removesocket=(_socket)=>{
-            try{
-                if(!family(this.config.sockets,_socket,'delete')){this.print(this.config.name+'.removesocket(\''+''+'\') -> socket not found');return false;}
-                return true;
-            }
-            catch(err){this.print(err);}
+            if(!arrdel(this.config.sockets,_socket)){this.print(this.config.name+'.removesocket(\''+_socket+'\')'+arrow+'not found');return false;}
+            return true;
+        };        
+        this.addchild=(_child)=>{
+            if(_child===this){this.print(this.config.name+'.addchild(\''+this.config.name+'\')'+arrow+'cannot be child of itself');return false;}
+            if(!isflog(_child,'addchild')){return false;}
+            if(related(_child,'addchild')){this.print(this.config.name+'.addchild(\''+_child.config.name+'\')'+arrow+'already relatives');return false;}
+            this.config.children.push(_child);
+            _child.config.parents.push(this);
+            _child.config.writeconsole=false;
+            return true;
+        };
+        this.addparent=(_parent)=>{
+            if(_parent===this){this.print(this.config.name+'.addparent(\''+this.config.name+'\')'+arrow+'cannot be parent of itself');return false;}
+            if(!isflog(_parent,'addparent'))return false;
+            if(related(_parent,'addparent')){this.print(this.config.name+'.addparent(\''+_parent.config.name+'\')'+arrow+'already relatives');return false;}
+            this.config.parents.push(_parent);
+            _parent.config.children.push(this);
+            this.config.writeconsole=false;
+            return true;
         };
         this.removechild=(_child)=>{
-            try{
-                if(typeof(_child)==='undefined'){return false;}
-                if(!(_child instanceof io)){this.print(this.config.name+'.removechild(',_child,') -> not an instance of '+flogname);return false;}
-                if(!family(this.config.children,_child,'delete')){this.print(this.config.name+'.removeparent(\''+_child.config.name+'\') -> child not found');}
-                if(!family(_child.config.parents,this,'delete')){this.print(this.config.name+'.removeparent(\''+_child.config.name+'\') -> parent not found');}
-                if(_child.config.parents.length===0){_child.config.writeconsole=_child.config.writeinit;}
-                return true;
-            }
-            catch(err){this.print(err);}
-        };
-        this.removeparent=(_parent)=>{
-            try{
-                if(typeof(_parent)==='undefined'){return false;}
-                if(!(_parent instanceof io)){this.print(this.config.name+'.removeparent(',_parent,') -> not an instance of '+flogname);return false;}
-                if(!family(_parent.config.children,this,'delete')){this.print(this.config.name+'.removeparent(\''+_parent.config.name+'\') -> child not found');}                
-                if(!family(this.config.parents,_parent,'delete')){this.print(this.config.name+'.removeparent(\''+_parent.config.name+'\') -> parent not found');}
-                if(this.config.parents.length===0){this.config.writeconsole=this.config.writeinit;}
-                return true;
-            }
-            catch(err){this.print(err);}
-        };
-        //===================================================
-        let family=(arr,_obj,mod='')=>{
-            try{
-                for(let i=0;i<arr.length;i++){
-                    if(arr[i]===_obj){
-                        if(mod==='return'){return arr[i];}
-                        if(mod==='delete'){arr.splice(i,1);}
-                        return true;
-                    }
-                }
-                if(mod==='add'){arr.push(_obj);}
+            if(!isflog(_child,'removechild')){return false;}
+            let cdel=arrdel(this.config.children,_child);
+            let pdel=arrdel(_child.config.parents,this);
+            if(!cdel&&!pdel){
+                this.print(this.config.name+'.removechild(\''+_child.config.name+'\')'+arrow+'not found');
                 return false;
             }
-            catch(err){this.print(err);}
+            if(_child.config.parents.length===0){_child.config.writeconsole=_child.config.writeinit;}
+            return true;
+        };
+        this.removeparent=(_parent)=>{
+            if(!isflog(_parent,'removeparent')){return false;}
+            let pdel=arrdel(this.config.parents,_parent);
+            let cdel=arrdel(_parent.config.children,this);
+            if(!pdel&&!cdel){
+                this.print(this.config.name+'.removeparent(\''+_parent.config.name+'\')'+arrow+'not found');
+                return false;
+            }
+            if(this.config.parents.length===0){this.config.writeconsole=this.config.writeinit;}
+            return true;
+        };
+        //===================================================
+        let isflog=(_obj,_func)=>{
+            if(!(_obj instanceof io)){
+                if(_func!==undefined){this.print(this.config.name+'.'+_func+'(',_obj,')'+arrow+'not instance of '+flogname);}
+                return false;
+            }
+            return true;
+        };
+        let related=(_relative,_func)=>{
+            let ancestor=(_rel,_arr)=>{
+                for(let i=0;i<_arr.length;i++){
+                    if(_arr[i]===_rel){return true;}
+                    if(ancestor(_rel,_arr[i].config.parents)){return true;}
+                }
+                return false;
+            };
+            let descendant=(_rel,_arr)=>{
+                for(let i=0;i<_arr.length;i++){
+                    if(_arr[i]===_rel){return true;}
+                    if(descendant(_rel,_arr[i].config.children)){return true;}
+                }
+                return false;
+            };
+            if(ancestor(_relative,this.config.parents)||descendant(_relative,this.config.children)){return true;}
+            return false;
         };
         let send=(_msg,test,sock)=>{
             let emit=(socket,msg)=>{
@@ -109,19 +108,16 @@ const flog=(()=>{
                 catch(err){this.print(err);return false;}
             };
             if(test){return emit(sock,_msg);}
-            try{
-                for(let s=0;s<this.config.sockets.length;s++){
-                    if(typeof(_msg)==='object'){
-                        let temp='{';
-                        for(let i in _msg){temp+=(typeof(_msg[i])==='function')?(' '+i+': function,'):(' '+i+': '+_msg[i]+',');}
-                        temp=temp.slice(0,temp.length-1);
-                        temp+=' }';
-                        emit(this.config.sockets[s],temp);
-                    }
-                    else{emit(this.config.sockets[s],_msg);}
+            for(let s=0;s<this.config.sockets.length;s++){
+                if(typeof(_msg)==='object'){
+                    let temp='{';
+                    for(let i in _msg){temp+=(typeof(_msg[i])==='function')?(' '+i+': function,'):(' '+i+': '+_msg[i]+',');}
+                    temp=temp.slice(0,temp.length-1);
+                    temp+=' }';
+                    emit(this.config.sockets[s],temp);
                 }
+                else{emit(this.config.sockets[s],_msg);}
             }
-            catch(err){this.print(err);}
         };
         let _print=(_input,_fromconsole)=>{
             try{
@@ -141,7 +137,16 @@ const flog=(()=>{
                     }
                 }
             }
-            catch(err){this.print(err);}
+            catch(err){console.log(err,this.config.name+'.print() error > check arguments:',arguments);}
+        };
+        let arrdel=(_arr,_obj)=>{
+            for(let i=0;i<_arr.length;i++){
+                if(_arr[i]===_obj){
+                    _arr.splice(i,1);
+                    return true;
+                }
+            }
+            return false;
         };
         //==================================================================================================================
         this.config={};
@@ -224,3 +229,5 @@ const flog=(()=>{
     };
 return{io};})();
 module.exports=flog;
+
+
