@@ -6,14 +6,14 @@ The nested structure allows for a more varied console.log() usage.<br/>
 Replace your console.log() calls with flog.io.print(), or use them together.<br/>
 
 <br/>
+v3.2.0<br/>
+-
+---added file logging<br/>
+
+<br/>
 v3.1.3<br/>
 -
 ---added branch checking of existing flog to prevent circular references<br/>
-
-<br/>
-v3.1.2<br/>
--
----improved .addchild()/.addparent() checking of existing flog<br/>
 <br/><br/>
 
 npm install flog.io
@@ -35,6 +35,7 @@ name:'flog.io'<br/>
 ,emitname:'flog.io'   -> socket emit event name<br/>
 ,parents:[]   -> parents array<br/>
 ,children:[]   -> children array<br/>
+,logfile:false   -> log to file<br/>
 }<br/>
 <br/>
 
@@ -54,10 +55,14 @@ Using print():<br/>
 
 To enable the socket logging:<br/>
 ---log.addsocket(socket) -> add a socket to pass print() arguments to using config.emitname<br/>
----The receiving socket.on(event,args) event by default is {emitname:'flog.io'}<br/>
+---the receiving socket.on(event,args) event by default is {emitname:'flog.io'}<br/>
 ---sockets can also be added at instantiation<br/>
 
-To use parent-child structure logging of multiple logs,<br/>
+To use parent-child structure logging of multiple logs:<br/>
 ---log.addchild(child) -> add a child log, the child.print() calls will also call the parent.print()<br/>
 ---log.addparent(parent) -> add a parent log, similar to above<br/>
 ---parents/children can also be added at instantiation<br/>
+
+Log to file:<br/>
+---use the config setting 'logfile:true'<br/>
+---for nowlogs can be found in the 'flog.io' module folder<br/>

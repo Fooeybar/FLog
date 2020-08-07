@@ -1,6 +1,9 @@
 const flog=(()=>{
     const flogname='flog.io';
+    const dir=__dirname+'/'+flogname;
     const arrow=' >> ';
+    const fs=require('fs');
+    fs.mkdir(dir,(err)=>{});
     const io=function(
         _config={
             name:typeof 'string'
@@ -10,6 +13,7 @@ const flog=(()=>{
             ,emitname:typeof 'string'
             ,parents:typeof 'object'
             ,children:typeof 'object'
+            ,logfile:typeof 'boolean'
         }){
         //==================================================================================================================
         this.print=function(){
@@ -79,7 +83,7 @@ const flog=(()=>{
         //===================================================
         let isflog=(_obj,_func)=>{
             if(!(_obj instanceof io)){
-                if(_func!==undefined){this.print(this.config.name+'.'+_func+'(',_obj,')'+arrow+'not instance of '+flogname);}
+                if(_func!==undefined){this.print(this.config.name+'.'+_func+'(\''+_obj.constructor.name+'\')'+arrow+'not instance of '+flogname);}
                 return false;
             }
             return true;
@@ -125,15 +129,16 @@ const flog=(()=>{
                 if(typeof(_fromconsole)!=='boolean'){_fromconsole=false;}  
                 for(let i in _input){
                     if(!this.config.readconsole){
-                        if(this.config.writeconsole){console.log(_input[i]);send(_input[i]);}
-                        else{send(_input[i]);}
+                        if(this.config.writeconsole){console.log(_input[i]);}
+                        send(_input[i]);
+                        file(_input[i]);
                     }
                     else{
                         if(this.config.writeconsole){
                             if(!_fromconsole){console.log(_input[i]);}
-                            else{send(_input[i]);}
+                            else{send(_input[i]);file(_input[i]);}
                         }
-                        else{send(_input[i]);}
+                        else{send(_input[i]);file(_input[i]);}
                     }
                 }
             }
@@ -147,6 +152,15 @@ const flog=(()=>{
                 }
             }
             return false;
+        };
+        let file=(_msg='empty call',_new=false)=>{
+            if(!this.config.logfile){return false;}
+            if(file.nme===undefined){file.nme=dir+'/'+this.config.name+'-'+Date.now()+'.txt';}
+            if(_new){
+                try{fs.appendFile(file.nme,'['+Date.now()+']'+arrow+'------new '+flogname+' log------',(_err)=>{if(_err){this.print(err);}});return true;}
+                catch(err){this.print(err);return false;}
+            }
+            fs.appendFile(file.nme,'\n['+Date.now()+']'+_msg,(err)=>{if(err){this.print(err);}});
         };
         //==================================================================================================================
         this.config={};
@@ -172,6 +186,9 @@ const flog=(()=>{
 
         if(_config.children===undefined||!(Array.isArray(_config.children)))Object.defineProperty(this.config,'children',{value:[],enumerable:true,writable:true});
         else Object.defineProperty(this.config,'children',{value:_config.children,enumerable:true,writable:true});
+
+        if(_config.logfile===undefined||typeof _config.logfile!=='boolean')Object.defineProperty(this.config,'logfile',{value:false,enumerable:true,writable:false});
+        else Object.defineProperty(this.config,'logfile',{value:_config.logfile,enumerable:true,writable:false});
 
         if(this.config.readconsole){
             try{
@@ -225,7 +242,9 @@ const flog=(()=>{
             }
             catch(err){this.print(err);}
         }
-
+        if(this.config.logfile){
+            file(undefined,true);
+        }
     };
 return{io};})();
 module.exports=flog;
