@@ -1,7 +1,7 @@
 {
   "name": "flog.io",
-  "version": "3.2.0",
-  "description": "Extended Console.log // Nested And Socket Logging",
+  "version": "3.2.1",
+  "description": "Nested Log Trees // Console And Socket Logging",
   "main": "flog.io.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

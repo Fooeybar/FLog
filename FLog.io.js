@@ -9,11 +9,11 @@ const flog=(()=>{
             name:typeof 'string'
             ,writeconsole:typeof 'boolean'
             ,readconsole:typeof 'boolean'
+            ,logfile:typeof 'boolean'
             ,sockets:typeof 'object'
             ,emitname:typeof 'string'
             ,parents:typeof 'object'
             ,children:typeof 'object'
-            ,logfile:typeof 'boolean'
         }){
         //==================================================================================================================
         this.print=function(){

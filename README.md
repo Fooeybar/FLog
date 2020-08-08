@@ -1,7 +1,7 @@
 # flog.io
-Extended Console.log Factory // Nested And Socket Logging<br/>
+Nested Log Trees // Console And Socket Logging<br/>
 -
-flog.io is a tool for nested logging.<br/>
+flog.io is a tool for nested tree logging.<br/>
 The nested structure allows for a more varied console.log() usage.<br/>
 Replace your console.log() calls with flog.io.print(), or use them together.<br/>
 
@@ -31,11 +31,11 @@ Default Config Object:<br/>
 name:'flog.io'<br/>
 ,readconsole:false   -> read console.log() calls<br/>
 ,writeconsole:true   -> send to console.log()<br/>
+,logfile:false   -> save a log file<br/>
 ,sockets:[]   -> sockets array<br/>
 ,emitname:'flog.io'   -> socket emit event name<br/>
 ,parents:[]   -> parents array<br/>
 ,children:[]   -> children array<br/>
-,logfile:false   -> log to file<br/>
 }<br/>
 <br/>
 
@@ -50,19 +50,24 @@ Functions:<br/>
 <br/>
 Using print():<br/>
 ---using a comma between arguments will start a new line<br/>
----replace the use of console.log() with log.print(), .print() will write to the console, send over any sockets, and send to any parents<br/>
----or use console.log() and declare a flog.io with 'config={readconsole:true}' to read the console.log() and automatically send to any sockets or parent logs<br/>
+---replace the use of console.log() with .print(), .print() will write to the console, send over any sockets, save to a log file, and send to any parents<br/>
+---or use console.log() and declare a flog.io with 'readconsole:true' to read the console.log() and automatically send to any log files, sockets, or parent logs<br/>
 
-To enable the socket logging:<br/>
----log.addsocket(socket) -> add a socket to pass print() arguments to using config.emitname<br/>
----the receiving socket.on(event,args) event by default is {emitname:'flog.io'}<br/>
----sockets can also be added at instantiation<br/>
-
-To use parent-child structure logging of multiple logs:<br/>
----log.addchild(child) -> add a child log, the child.print() calls will also call the parent.print()<br/>
----log.addparent(parent) -> add a parent log, similar to above<br/>
+To use nested tree logging:<br/>
+---.addchild(child) -> add a child log, the child.print() calls will also call the parent.print()<br/>
+---.addparent(parent) -> add a parent log, similar to above<br/>
+---.removechild(child) -> remove a child log<br/>
+---.removeparent(parent) -> remove a parent log<br/>
 ---parents/children can also be added at instantiation<br/>
+---Children copy their parents to the child's .print() calls, and those parents will copy their parents to the .print() call, etc<br/>
+---Create any tree structure you like<br/>
 
 Log to file:<br/>
 ---use the config setting 'logfile:true'<br/>
----for nowlogs can be found in the 'flog.io' module folder<br/>
+---every new flog.io has its own log file<br/>
+---for now logs can be found in the 'flog.io' module folder<br/>
+
+To enable the socket logging:<br/>
+---.addsocket(socket) -> add a socket to pass print() arguments to using config.emitname<br/>
+---the receiving socket.on(event,args) event by default is 'emitname:'flog.io''<br/>
+---sockets can also be added at instantiation<br/>
